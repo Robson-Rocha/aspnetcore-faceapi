@@ -1,0 +1,57 @@
+@page
+@model FaceLoginModel
+@{
+    ViewData["Title"] = "Face Login";
+}
+@if(Model.IdentifiedUser != null) {
+<div class="row">
+    <div class="col-sm-5">
+        <img src="@Model.IdentifiedUser.ImageDataUrl" />
+    </div>
+    <div class="offset-sm-1 col-sm-5">
+        <img src="@Model.UploadedPicture" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 text-center">Olá, @Model.IdentifiedUser.Name!</div>
+</div>
+}
+
+<div class="row">
+    <div class="offset-sm-3 col-sm-6">
+        <video id="video" width="640" height="480" muted autoplay></video>
+        <canvas id="canvas" width="640" height="480" style="display: none"></canvas>
+        <button id="btnTakePicture" class="btn btn-lg btn-success">Take Picture</button>
+        <form method="post" id="loginForm">
+            <input type="hidden" id="dataUrl" name="dataUrl"/>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Put event listeners into place
+    window.addEventListener("DOMContentLoaded", function() {
+        var video = document.getElementById("video");
+
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            }).catch(function(e) {
+                console.log("An error has occurred!", e)
+            });
+        }
+
+        // Trigger photo take
+        document.getElementById("btnTakePicture").addEventListener("click", function() {
+            var canvas = document.getElementById("canvas");
+            canvas.getContext("2d").drawImage(video, 0, 0, 640, 480);
+            video.style.display = "none";
+            canvas.style.display = "block";
+            document.getElementById("dataUrl").value = canvas.toDataURL("image/png");
+            document.getElementById("loginForm").submit();
+        });
+    }, false);
+</script>
+}
